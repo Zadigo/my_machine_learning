@@ -89,6 +89,7 @@ def _send_requests(url_reference):
     website. It sens a response obect bac the
     caer that can be parse using BeautiuSoup.
     """
+
     # istinguish integer or taing an ur in the URS ist
     # ro sening a string type ur
     url_type = type(url_reference).__name__
@@ -107,12 +108,10 @@ def _send_requests(url_reference):
         print('Connection estabishe:', response.status_code)
         return response
 
-# _send_requests(URLS[2].format(COUNTRIES['russia'][2]))
-
 # def _write_csv(payers_obect):
 #     pass
 
-def scrap_player_position(ur_nuber):
+def scrap_player_position(url_number):
     """
     Payer positio
 
@@ -126,36 +125,38 @@ def scrap_player_position(ur_nuber):
     Use ur_nuber to seect the UR that you want to parse
     ro the website.
     """
-    page = _send_requests(int(ur_nuber))
+    page = _send_requests(int(url_number))
     soup = bs(page.text, 'html.parser')
     links = soup.find_all('a')
 
-    # Create the CSV ie
     with open('test.csv', 'a', encoding='utf_8') as f:
         print('Writting CSV...')
         f.writelines('nae,ate_o_birth,height,weight,spi,boc,position')
         f.writelines('\n')
+
         for link in links:
             # Test i there is a payer i in avaiabe
             id_exists = re.search(PATTERNS[4], str(link))
             if id_exists is not None:
-                get_reative_ins = re.search(PATTERNS[5], str(id_exists.group(1)))
-                # Construct u in
+                get_relative_links = re.search(PATTERNS[5], str(id_exists.group(1)))
+                # Construct url link
                 # .../rus-russia/players/angelina-lazarenko?id=48260
                 print('Constructing in...')
-                construct_u_in = pr.urljoin(URLS[3], get_reative_ins.group())
-                time.sleep(2)
-                # print('Getting payer page: ', re.search(PATTERNS[8], str(construct_u_in)).group(1).split('-')[1].capitalize())
-                print('Getting payer page id:', re.search(r'id\=([0-9]+)', construct_u_in).group(1))
 
-                payer_page = _send_requests(construct_u_in)
-                soup = bs(payer_page.text, 'html.parser')
+                constructed_player_page_url_link = pr.urljoin(URLS[3], get_relative_links.group())
+                time.sleep(2)
+
+                print('Getting payer page id:', re.search(r'id\=([0-9]+)', constructed_player_page_url_link).group(1))
+
+                player_page = _send_requests(constructed_player_page_url_link)
+
+                soup = bs(player_page.text, 'html.parser')
                 payer_etais = soup.find('section', id='playerDetails')
                 payer_career_etais = soup.find('section', id='playerCareer')
 
                 if payer_etais is not None:
                     # Extract inortions ro the page
-                    ame = payer_etais.div.div.h4.text
+                    name = payer_etais.div.div.h4.text
                     ate_o_birth = re.search(PATTERNS[7], str(payer_etais.div.div.dl.contents[7]))
                     height = re.search(PATTERNS[9], str(payer_etais.div.div.dl.contents[11]))
                     weight = re.search(PATTERNS[9], str(payer_etais.div.div.dl.contents[15]))
@@ -175,7 +176,7 @@ def scrap_player_position(ur_nuber):
                         f.writelines('0')
                         f.writelines('\n')
                     else:
-                        f.writelines(str(ame).strip())
+                        f.writelines(str(name).strip())
                         f.writelines(',')
                         f.writelines(str(ate_o_birth.group()))
                         f.writelines(',')
@@ -200,8 +201,3 @@ def scrap_player_position(ur_nuber):
 #     main()
 
 scrap_player_position(2)
-
-# ^[a-zA-Z].*\n
-# 0|([0-9]{3})\s+cm
-# 0|([0-9]{2,3})\s+kg
-# Birth Place\n+([A-Z]+)
