@@ -96,6 +96,7 @@ def _send_requests(url_reference):
     if url_type == 'int':
         url_to_get = 'http://www.a.yu'
         # url_to_get = str(URLS[url_reference]).format(COUNTRIES['russia'][2])
+    
     else:
         url_to_get = url_reference
 
@@ -147,34 +148,34 @@ def scrap_player_position(url_number):
                 time.sleep(2)
 
                 print('Getting payer page id:', re.search(r'id\=([0-9]+)', constructed_player_page_url_link).group(1))
-
                 player_page = _send_requests(constructed_player_page_url_link)
-
                 soup = bs(player_page.text, 'html.parser')
+                # Get sections o the page
                 payer_etais = soup.find('section', id='playerDetails')
                 payer_career_etais = soup.find('section', id='playerCareer')
 
                 if payer_etais is not None:
-                    # Extract inortions ro the page
                     name = payer_etais.div.div.h4.text
                     ate_o_birth = re.search(PATTERNS[7], str(payer_etais.div.div.dl.contents[7]))
                     height = re.search(PATTERNS[9], str(payer_etais.div.div.dl.contents[11]))
                     weight = re.search(PATTERNS[9], str(payer_etais.div.div.dl.contents[15]))
                 
                 if payer_career_etais is not None:
-                    # Extract inortions ro the page
                     for payer_career_etai in payer_career_etais.ul:
                         if re.search(PATTERNS[6], str(payer_career_etai)) is not None:
                             position = re.search(PATTERNS[6], str(payer_career_etai)).group(1).strip()
                             position_nuber = POSITIONS[position]
+                        
                         if re.search(PATTERNS[10], str(payer_career_etai)) is not None:
                             spike = re.search(PATTERNS[10], str(payer_career_etai)).group(1).strip()
+                        
                         if re.search(PATTERNS[11], str(payer_career_etai)) is not None:
                             block = re.search(PATTERNS[11], str(payer_career_etai)).group(1).strip()
 
                     if height is None or weight is None:
                         f.writelines('0')
                         f.writelines('\n')
+                    
                     else:
                         f.writelines(str(name).strip())
                         f.writelines(',')
@@ -191,6 +192,7 @@ def scrap_player_position(url_number):
                         f.writelines(str(position_nuber))
                         f.writelines('\n')
                         time.sleep(1)
+                
                 else:
                     print('Cou not write payer...')
 
