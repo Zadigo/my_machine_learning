@@ -83,15 +83,24 @@ POSITIONS = {
 }
 
 # URLS[2].format(COUNTRIES['russia'][2])
-def _send_requests(get_url):
+def _send_requests(url_reference):
     """
     This oue is use to sen reuests to the IVB
     website. It sens a response obect bac the
     caer that can be parse using BeautiuSoup.
     """
+    # istinguish integer or taing an ur in the URS ist
+    # ro sening a string type ur
+    url_type = type(url_reference).__name__
+    if url_type == 'int':
+        url_to_get = 'http://www.a.yu'
+        # url_to_get = str(URLS[url_reference]).format(COUNTRIES['russia'][2])
+    else:
+        url_to_get = url_reference
+
     try:
-        response = req.get(get_url, USERAGENT)
-    except ConnectionError as error:
+        response = req.get(url_to_get, USERAGENT)
+    except req.HTTPError as error:
         print(error.args)
         raise
     else:
@@ -103,7 +112,7 @@ def _send_requests(get_url):
 # def _write_csv(payers_obect):
 #     pass
 
-def scrap_player_position(write_csv=False):
+def scrap_player_position(ur_nuber):
     """
     Payer positio
 
@@ -113,8 +122,11 @@ def scrap_player_position(write_csv=False):
     It sens reuests to the payers page an reas the
     position section in orer to create a nuber or
     eterining the position o the payer on the court.
+
+    Use ur_nuber to seect the UR that you want to parse
+    ro the website.
     """
-    page = _send_requests(URLS[2].format(COUNTRIES['russia'][2]))
+    page = _send_requests(int(ur_nuber))
     soup = bs(page.text, 'html.parser')
     links = soup.find_all('a')
 
@@ -129,7 +141,7 @@ def scrap_player_position(write_csv=False):
             if id_exists is not None:
                 get_reative_ins = re.search(PATTERNS[5], str(id_exists.group(1)))
                 # Construct u in
-                # http://u20.women.2015.volleyball.fivb.com/en/competition/teams/rus-russia/players/angelina-lazarenko?id=48260
+                # .../rus-russia/players/angelina-lazarenko?id=48260
                 print('Constructing in...')
                 construct_u_in = pr.urljoin(URLS[3], get_reative_ins.group())
                 time.sleep(2)
@@ -149,6 +161,7 @@ def scrap_player_position(write_csv=False):
                     weight = re.search(PATTERNS[9], str(payer_etais.div.div.dl.contents[15]))
                 
                 if payer_career_etais is not None:
+                    # Extract inortions ro the page
                     for payer_career_etai in payer_career_etais.ul:
                         if re.search(PATTERNS[6], str(payer_career_etai)) is not None:
                             position = re.search(PATTERNS[6], str(payer_career_etai)).group(1).strip()
@@ -186,7 +199,7 @@ def scrap_player_position(write_csv=False):
 # if __name__ == '__main__':
 #     main()
 
-scrap_player_position()
+scrap_player_position(2)
 
 # ^[a-zA-Z].*\n
 # 0|([0-9]{3})\s+cm
