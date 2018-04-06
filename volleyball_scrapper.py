@@ -52,10 +52,12 @@ USERAGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Fi
 
 # 4: rus-russia/players/angelina-lazarenko?id=48260 id="...
 # 5: rus-russia/players/angelina-lazarenko?id=48260
-# 6: <strong>                            Wing Spiker</strong>
+# 6: <strong> Wing Spiker</strong>
 # 7: 14/02/1996
 # 8: players/victoria-zhurbenko
 # 9: >71 kg or >171 c or 0
+# 10: > Spike</span><strong> 296</strong>
+# 11: > Block</span><strong> 296</strong>
 PATTERNS = [
     r'\>([a-zA-Z].*)\<\/[a]\>',
     r'\<td\>([0-9]{3})\<\/td\>',
@@ -63,17 +65,19 @@ PATTERNS = [
     r'\<td\>(0|[2-3]\d+)\<\/td\>\n\<td\>(0|[2-3]\d+)\<\/td\>',
     r'(([a-z]{3}\-[a-z]+\/)players\/\w.*)(\")',
     r'[a-z]{3}\-[a-z]+\/players\/\w.*\?id\=\w+',
-    r'\<strong\>\s+(Middle blocker|Setter|Universal|Wing Spiker|Libero|Opposite spiker)\<\/strong\>',
+    r'\>\s+Position\<\/span\>\s+\<strong\>\s+(Opposite spiker|Setter|Wing spiker|Middle blocker|Universal|Libero)',
     r'[0-9]{2}\/[0-9]{2}\/[0-9]{4}',
     r'players\/(\w.*)\?',
-    r'\>([0-9]{1,3})'
+    r'\>([0-9]{1,3})',
+    r'\>\s+Spike\<\/span\>\s+\<strong\>\s+([0-9]+)',
+    r'\>\s+Block\<\/span\>\s+\<strong\>\s+([0-9]+)'
 ]
 
 POSITIONS = {
     'Middle blocker': 3,
     'Setter': 1,
     'Universal': 4,
-    'Wing Spiker': 2,
+    'Wing spiker': 2,
     'Libero': 6,
     'Opposite spiker': 4
 }
@@ -135,14 +139,24 @@ def scrap_player_position(write_csv=False):
                 payer_page = _send_requests(construct_u_in)
                 soup = bs(payer_page.text, 'html.parser')
                 payer_etais = soup.find('section', id='playerDetails')
-                # payer_career_etais = soup.find('section', id='playerCareer')
-                
+                payer_career_etais = soup.find('section', id='playerCareer')
+
                 if payer_etais is not None:
                     # Extract inortions ro the page
                     ame = payer_etais.div.div.h4.text
                     ate_o_birth = re.search(PATTERNS[7], str(payer_etais.div.div.dl.contents[7]))
                     height = re.search(PATTERNS[9], str(payer_etais.div.div.dl.contents[11]))
                     weight = re.search(PATTERNS[9], str(payer_etais.div.div.dl.contents[15]))
+                
+                if payer_career_etais is not None:
+                    for payer_career_etai in payer_career_etais.ul:
+                        if re.search(PATTERNS[6], str(payer_career_etai)) is not None:
+                            position = re.search(PATTERNS[6], str(payer_career_etai)).group(1).strip()
+                            position_nuber = POSITIONS[position]
+                        if re.search(PATTERNS[10], str(payer_career_etai)) is not None:
+                            spike = re.search(PATTERNS[10], str(payer_career_etai)).group(1).strip()
+                        if re.search(PATTERNS[11], str(payer_career_etai)) is not None:
+                            block = re.search(PATTERNS[11], str(payer_career_etai)).group(1).strip()
 
                     if height is None or weight is None:
                         f.writelines('0')
@@ -155,6 +169,12 @@ def scrap_player_position(write_csv=False):
                         f.writelines(str(height.group(1)))
                         f.writelines(',')
                         f.writelines(str(weight.group(1)))
+                        f.writelines(',')
+                        f.writelines(str(spike))
+                        f.writelines(',')
+                        f.writelines(str(block))
+                        f.writelines(',')
+                        f.writelines(str(position_nuber))
                         f.writelines('\n')
                         time.sleep(1)
                 else:
