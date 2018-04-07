@@ -158,26 +158,26 @@ def scrap_player_position(url_number):
                 player_page = _send_requests(constructed_player_page_url_link)
                 soup = bs(player_page.text, 'html.parser')
                 # Get sections o the page
-                payer_etais = soup.find('section', id='playerDetails')
-                payer_career_etais = soup.find('section', id='playerCareer')
+                player_details = soup.find('section', id='playerDetails')
+                player_career_details = soup.find('section', id='playerCareer')
 
-                if payer_etais is not None:
-                    name = payer_etais.div.div.h4.text
-                    ate_o_birth = re.search(PATTERNS[7], str(payer_etais.div.div.dl.contents[7]))
-                    height = re.search(PATTERNS[9], str(payer_etais.div.div.dl.contents[11]))
-                    weight = re.search(PATTERNS[9], str(payer_etais.div.div.dl.contents[15]))
+                if player_details is not None:
+                    name = player_details.div.div.h4.text
+                    date_of_birth = re.search(PATTERNS[7], str(player_details.div.div.dl.contents[7]))
+                    height = re.search(PATTERNS[9], str(player_details.div.div.dl.contents[11]))
+                    weight = re.search(PATTERNS[9], str(player_details.div.div.dl.contents[15]))
                 
-                if payer_career_etais is not None:
-                    for payer_career_etai in payer_career_etais.ul:
-                        if re.search(PATTERNS[6], str(payer_career_etai)) is not None:
-                            position = re.search(PATTERNS[6], str(payer_career_etai)).group(1).strip()
+                if player_career_details is not None:
+                    for player_career_detail in player_career_details.ul:
+                        if re.search(PATTERNS[6], str(player_career_detail)) is not None:
+                            position = re.search(PATTERNS[6], str(player_career_detail)).group(1).strip()
                             position_nuber = POSITIONS[position]
                         
-                        if re.search(PATTERNS[10], str(payer_career_etai)) is not None:
-                            spike = re.search(PATTERNS[10], str(payer_career_etai)).group(1).strip()
+                        if re.search(PATTERNS[10], str(player_career_detail)) is not None:
+                            spike = re.search(PATTERNS[10], str(player_career_detail)).group(1).strip()
                         
-                        if re.search(PATTERNS[11], str(payer_career_etai)) is not None:
-                            block = re.search(PATTERNS[11], str(payer_career_etai)).group(1).strip()
+                        if re.search(PATTERNS[11], str(player_career_detail)) is not None:
+                            block = re.search(PATTERNS[11], str(player_career_detail)).group(1).strip()
 
                     if height is None or weight is None:
                         f.writelines('0')
@@ -186,7 +186,7 @@ def scrap_player_position(url_number):
                     else:
                         f.writelines(str(name).strip())
                         f.writelines(',')
-                        f.writelines(str(ate_o_birth.group()))
+                        f.writelines(str(date_of_birth.group()))
                         f.writelines(',')
                         f.writelines(str(height.group(1)))
                         f.writelines(',')
