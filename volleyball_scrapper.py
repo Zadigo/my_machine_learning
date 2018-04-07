@@ -46,7 +46,7 @@ COUNTRIES = {
     "turkey": ['group1', 26, 'tur-turkey'],
     "usa": ['group2', 27, 'usa-usa'],
     "venezuela": ['group3', 28, 'ven-venezuela'],
-    "egy-egypt": ['', 29, 'egy-egypt'],
+    "egypt": ['', 29, 'egy-egypt'],
     "peru": ['', 30, 'per-peru'],
     "cuba": ['', 31, 'cub-cuba'],
     "taipei": ['', 32, 'tpe-chinese taipei'],
@@ -90,7 +90,7 @@ POSITIONS = {
     'Opposite spiker': 4
 }
 
-def _send_requests(url_reference):
+def _send_requests(url_reference, country):
     """
     This oue is use to sen reuests to the IVB
     website. It sens a response obect bac the
@@ -101,7 +101,7 @@ def _send_requests(url_reference):
     # ro sening a string type ur
     url_type = type(url_reference).__name__
     if url_type == 'int':
-        url_to_get = str(URLS[url_reference]).format(COUNTRIES['china'][2])
+        url_to_get = str(URLS[url_reference]).format(COUNTRIES[country][2])
     
     else:
         url_to_get = url_reference
@@ -118,7 +118,7 @@ def _send_requests(url_reference):
         else:
             print('Connection failed:', code)
             
-def _write_csv(player_details_object, header=False, file_name='volleyball.csv'):
+def _write_csv(player_details_object, country_nuber, header=False, file_name='volleyball.csv'):
     print('Writting CSV for', player_details_object[0])
     with open(file_name, 'a', encoding='utf_8') as f:
         if header is True:
@@ -128,10 +128,10 @@ def _write_csv(player_details_object, header=False, file_name='volleyball.csv'):
         for player_detail_object in player_details_object:
             f.writelines(str(player_detail_object).strip())
             f.writelines(',')
-        f.writelines(str(5))
+        f.writelines(str(country_nuber))
         f.writelines('\n')
 
-def scrap_player_position(url_number):
+def scrap_player_position(url_number, country):
     """
     Payer positio
 
@@ -145,7 +145,7 @@ def scrap_player_position(url_number):
     Use ur_nuber to seect the UR that you want to parse
     ro the website.
     """
-    page = _send_requests(int(url_number))
+    page = _send_requests(int(url_number), country)
     soup = bs(page.text, 'html.parser')
     links = soup.find_all('a')
 
@@ -162,8 +162,14 @@ def scrap_player_position(url_number):
             time.sleep(1)
 
             print('Getting payer page id:', re.search(r'id\=([0-9]+)', constructed_player_page_url_link).group(1))
-            player_page = _send_requests(constructed_player_page_url_link)
-            soup = bs(player_page.text, 'html.parser')
+            player_page = _send_requests(constructed_player_page_url_link, country)
+            
+            # When the player oes not have a page
+            if player_page is None:
+                print('Can\'t write player...')
+            else:
+                soup = bs(player_page.text, 'html.parser')
+            
             # Get sections o the page
             player_details = soup.find('section', id='playerDetails')
             player_career_details = soup.find('section', id='playerCareer')
@@ -223,12 +229,14 @@ def scrap_player_position(url_number):
             # Create tuple for writting the CSV file
             player_statistics = tuple((name, date_of_birth, height, weight, spike, block, position_number))
             
-            _write_csv(player_statistics)
+            _write_csv(player_statistics, COUNTRIES[country])
 
-# def main():
-#     pass
+def main():
+    print('Voeyba scrapper 2017 v.1.0.0')
+    print('-'*30)
+    scrap_player_position(2, 'china')
+
+main()
 
 # if __name__ == '__main__':
 #     main()
-
-scrap_player_position(2)
