@@ -1,3 +1,7 @@
+"""
+.. note:: Response
+"""
+
 import re
 import time
 import requests as req
@@ -94,8 +98,7 @@ def _send_requests(url_reference):
     # ro sening a string type ur
     url_type = type(url_reference).__name__
     if url_type == 'int':
-        url_to_get = 'http://www.a.yu'
-        # url_to_get = str(URLS[url_reference]).format(COUNTRIES['russia'][2])
+        url_to_get = str(URLS[url_reference]).format(COUNTRIES['russia'][2])
     
     else:
         url_to_get = url_reference
@@ -103,11 +106,15 @@ def _send_requests(url_reference):
     try:
         response = req.get(url_to_get, USERAGENT)
     except req.HTTPError as error:
-        print(error.args)
-        raise
+        raise ConnectionError("{reason}".format(reason=error.args))
     else:
-        print('Connection estabishe:', response.status_code)
-        return response
+        code = response.status_code
+        if code >= 200 and code < 300:
+            print('Connection estabishe:', code)
+            return response
+        else:
+            print('Connection aie:', code)
+            
 
 # def _write_csv(payers_obect):
 #     pass
