@@ -76,8 +76,9 @@ PATTERNS = [
     r'\>\s+Spike\<\/span\>\s+\<strong\>\s+([0-9]+)',
     r'\>\s+Block\<\/span\>\s+\<strong\>\s+([0-9]+)',
     r'Value_1\"\>([0-9]{2}\/[0-9]{2}\/[0-9]{4})',
-    r'Value_3\"\>([0-9]{1,3})',
-    r'Value_4\"\>([0-9]{1,3})'
+    r'Value\_[2]\"\>([0-9]{1,3})',
+    r'Value\_[3]\"\>([0-9]{1,3})',
+    r'Value\_[4]\"\>([0-9]{1,3})'
 ]
 
 POSITIONS = {
@@ -89,7 +90,6 @@ POSITIONS = {
     'Opposite spiker': 4
 }
 
-# URLS[2].format(COUNTRIES['russia'][2])
 def _send_requests(url_reference):
     """
     This oue is use to sen reuests to the IVB
@@ -101,7 +101,7 @@ def _send_requests(url_reference):
     # ro sening a string type ur
     url_type = type(url_reference).__name__
     if url_type == 'int':
-        url_to_get = str(URLS[url_reference]).format(COUNTRIES['russia'][2])
+        url_to_get = str(URLS[url_reference]).format(COUNTRIES['china'][2])
     
     else:
         url_to_get = url_reference
@@ -113,17 +113,22 @@ def _send_requests(url_reference):
     else:
         code = response.status_code
         if code >= 200 and code < 300:
-            print('Connection estabishe:', code)
+            print('Connection estabished:', code)
             return response
         else:
-            print('Connection aie:', code)
+            print('Connection failed:', code)
             
-def _write_csv(player_details_object, file_name='volleyball.csv'):
+def _write_csv(player_details_object, header=False, file_name='volleyball.csv'):
     print('Writting CSV for', player_details_object[0])
     with open(file_name, 'a', encoding='utf_8') as f:
+        if header is True:
+            f.writelines('name,date_of_birth,height,weight,spike,block,position_number')
+            f.writelines('\n')
+
         for player_detail_object in player_details_object:
             f.writelines(str(player_detail_object).strip())
             f.writelines(',')
+        f.writelines(str(5))
         f.writelines('\n')
 
 def scrap_player_position(url_number):
@@ -144,11 +149,6 @@ def scrap_player_position(url_number):
     soup = bs(page.text, 'html.parser')
     links = soup.find_all('a')
 
-    # with open('test.csv', 'a', encoding='utf_8') as f:
-    # print('Writting CSV...')
-    # f.writelines('nae,ate_o_birth,height,weight,spi,boc,position')
-    # f.writelines('\n')
-
     for link in links:
         # Test i there is a payer i in avaiabe
         id_exists = re.search(PATTERNS[4], str(link))
@@ -168,6 +168,9 @@ def scrap_player_position(url_number):
             player_details = soup.find('section', id='playerDetails')
             player_career_details = soup.find('section', id='playerCareer')
 
+            name = date_of_birth = height = weight = ''
+            spike = block = ''
+
             if player_details is not None:
                 name = player_details.div.div.h4.text
 
@@ -177,12 +180,18 @@ def scrap_player_position(url_number):
 
                     if re.search(PATTERNS[13], str(player_detail)) is not None:
                         height = re.search(PATTERNS[13], str(player_detail)).group(1)
+                    # else:
+                    #     # Sometimes value_2 becomes value_3 and value_3 becomes value_4
+                    #     # so, to mitigate that, we search we search in value 3 to see
+                    #     # if we can find the values we are looking for
+                    #     if re.search(PATTERNS[14], str(player_detail)) is not None:
+                    #         height = re.search(PATTERNS[14], str(player_detail)).group(1)
 
                     if re.search(PATTERNS[14], str(player_detail)) is not None:
                         weight = re.search(PATTERNS[14], str(player_detail)).group(1)
-                # date_of_birth = re.search(PATTERNS[7], str(player_details.div.div.dl.contents[7]))
-                # height = re.search(PATTERNS[9], str(player_details.div.div.dl.contents[11]))
-                # weight = re.search(PATTERNS[9], str(player_details.div.div.dl.contents[15]))
+                    # else:
+                    #     if re.search(PATTERNS[15], str(player_detail)) is not None:
+                    #         weight = re.search(PATTERNS[15], str(player_detail)).group(1)
             
             if player_career_details is not None:
                 for player_career_detail in player_career_details.ul:
@@ -215,30 +224,6 @@ def scrap_player_position(url_number):
             player_statistics = tuple((name, date_of_birth, height, weight, spike, block, position_number))
             
             _write_csv(player_statistics)
-
-                # if height is None or weight is None:
-                #     f.writelines('0')
-                #     f.writelines('\n')
-                
-                # else:
-                #     f.writelines(str(name).strip())
-                #     f.writelines(',')
-                #     f.writelines(str(date_of_birth.group()))
-                #     f.writelines(',')
-                #     f.writelines(str(height.group(1)))
-                #     f.writelines(',')
-                #     f.writelines(str(weight.group(1)))
-                #     f.writelines(',')
-                #     f.writelines(str(spike))
-                #     f.writelines(',')
-                #     f.writelines(str(block))
-                #     f.writelines(',')
-                #     f.writelines(str(position_number))
-                #     f.writelines('\n')
-                #     time.sleep(1)
-            
-            # else:
-            #     print('Cou not write payer...')
 
 # def main():
 #     pass
