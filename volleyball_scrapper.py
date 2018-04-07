@@ -74,7 +74,10 @@ PATTERNS = [
     r'players\/(\w.*)\?',
     r'\>([0-9]{1,3})',
     r'\>\s+Spike\<\/span\>\s+\<strong\>\s+([0-9]+)',
-    r'\>\s+Block\<\/span\>\s+\<strong\>\s+([0-9]+)'
+    r'\>\s+Block\<\/span\>\s+\<strong\>\s+([0-9]+)',
+    r'Value_1\"\>([0-9]{2}\/[0-9]{2}\/[0-9]{4})',
+    r'Value_3\"\>([0-9]{1,3})',
+    r'Value_4\"\>([0-9]{1,3})'
 ]
 
 POSITIONS = {
@@ -115,9 +118,13 @@ def _send_requests(url_reference):
         else:
             print('Connection aie:', code)
             
-
-# def _write_csv(payers_obect):
-#     pass
+def _write_csv(player_details_object, file_name='volleyball.csv'):
+    print('Writting CSV for', player_details_object[0])
+    with open(file_name, 'a', encoding='utf_8') as f:
+        for player_detail_object in player_details_object:
+            f.writelines(str(player_detail_object).strip())
+            f.writelines(',')
+        f.writelines('\n')
 
 def scrap_player_position(url_number):
     """
@@ -137,71 +144,101 @@ def scrap_player_position(url_number):
     soup = bs(page.text, 'html.parser')
     links = soup.find_all('a')
 
-    with open('test.csv', 'a', encoding='utf_8') as f:
-        print('Writting CSV...')
-        f.writelines('nae,ate_o_birth,height,weight,spi,boc,position')
-        f.writelines('\n')
+    # with open('test.csv', 'a', encoding='utf_8') as f:
+    # print('Writting CSV...')
+    # f.writelines('nae,ate_o_birth,height,weight,spi,boc,position')
+    # f.writelines('\n')
 
-        for link in links:
-            # Test i there is a payer i in avaiabe
-            id_exists = re.search(PATTERNS[4], str(link))
-            if id_exists is not None:
-                get_relative_links = re.search(PATTERNS[5], str(id_exists.group(1)))
-                # Construct url link
-                # .../rus-russia/players/angelina-lazarenko?id=48260
-                print('Constructing in...')
+    for link in links:
+        # Test i there is a payer i in avaiabe
+        id_exists = re.search(PATTERNS[4], str(link))
+        if id_exists is not None:
+            get_relative_links = re.search(PATTERNS[5], str(id_exists.group(1)))
+            # Construct url link
+            # .../rus-russia/players/angelina-lazarenko?id=48260
+            print('Constructing link...')
 
-                constructed_player_page_url_link = pr.urljoin(URLS[3], get_relative_links.group())
-                time.sleep(2)
+            constructed_player_page_url_link = pr.urljoin(URLS[3], get_relative_links.group())
+            time.sleep(1)
 
-                print('Getting payer page id:', re.search(r'id\=([0-9]+)', constructed_player_page_url_link).group(1))
-                player_page = _send_requests(constructed_player_page_url_link)
-                soup = bs(player_page.text, 'html.parser')
-                # Get sections o the page
-                player_details = soup.find('section', id='playerDetails')
-                player_career_details = soup.find('section', id='playerCareer')
+            print('Getting payer page id:', re.search(r'id\=([0-9]+)', constructed_player_page_url_link).group(1))
+            player_page = _send_requests(constructed_player_page_url_link)
+            soup = bs(player_page.text, 'html.parser')
+            # Get sections o the page
+            player_details = soup.find('section', id='playerDetails')
+            player_career_details = soup.find('section', id='playerCareer')
 
-                if player_details is not None:
-                    name = player_details.div.div.h4.text
-                    date_of_birth = re.search(PATTERNS[7], str(player_details.div.div.dl.contents[7]))
-                    height = re.search(PATTERNS[9], str(player_details.div.div.dl.contents[11]))
-                    weight = re.search(PATTERNS[9], str(player_details.div.div.dl.contents[15]))
-                
-                if player_career_details is not None:
-                    for player_career_detail in player_career_details.ul:
-                        if re.search(PATTERNS[6], str(player_career_detail)) is not None:
-                            position = re.search(PATTERNS[6], str(player_career_detail)).group(1).strip()
-                            position_nuber = POSITIONS[position]
-                        
-                        if re.search(PATTERNS[10], str(player_career_detail)) is not None:
-                            spike = re.search(PATTERNS[10], str(player_career_detail)).group(1).strip()
-                        
-                        if re.search(PATTERNS[11], str(player_career_detail)) is not None:
-                            block = re.search(PATTERNS[11], str(player_career_detail)).group(1).strip()
+            if player_details is not None:
+                name = player_details.div.div.h4.text
 
-                    if height is None or weight is None:
-                        f.writelines('0')
-                        f.writelines('\n')
+                for player_detail in player_details.div.div.dl:
+                    if re.search(PATTERNS[12], str(player_detail)) is not None:
+                        date_of_birth = re.search(PATTERNS[12], str(player_detail)).group(1)
+
+                    if re.search(PATTERNS[13], str(player_detail)) is not None:
+                        height = re.search(PATTERNS[13], str(player_detail)).group(1)
+
+                    if re.search(PATTERNS[14], str(player_detail)) is not None:
+                        weight = re.search(PATTERNS[14], str(player_detail)).group(1)
+                # date_of_birth = re.search(PATTERNS[7], str(player_details.div.div.dl.contents[7]))
+                # height = re.search(PATTERNS[9], str(player_details.div.div.dl.contents[11]))
+                # weight = re.search(PATTERNS[9], str(player_details.div.div.dl.contents[15]))
+            
+            if player_career_details is not None:
+                for player_career_detail in player_career_details.ul:
+                    if re.search(PATTERNS[6], str(player_career_detail)) is not None:
+                        position = re.search(PATTERNS[6], str(player_career_detail)).group(1)
+                        position_number = POSITIONS[position]
                     
-                    else:
-                        f.writelines(str(name).strip())
-                        f.writelines(',')
-                        f.writelines(str(date_of_birth.group()))
-                        f.writelines(',')
-                        f.writelines(str(height.group(1)))
-                        f.writelines(',')
-                        f.writelines(str(weight.group(1)))
-                        f.writelines(',')
-                        f.writelines(str(spike))
-                        f.writelines(',')
-                        f.writelines(str(block))
-                        f.writelines(',')
-                        f.writelines(str(position_nuber))
-                        f.writelines('\n')
-                        time.sleep(1)
+                    if re.search(PATTERNS[10], str(player_career_detail)) is not None:
+                        spike = re.search(PATTERNS[10], str(player_career_detail)).group(1)
+                    
+                    if re.search(PATTERNS[11], str(player_career_detail)) is not None:
+                        block = re.search(PATTERNS[11], str(player_career_detail)).group(1)
                 
-                else:
-                    print('Cou not write payer...')
+            if name is None:
+                name = '0'
+            else:
+                name = str(name).strip()
+            if date_of_birth is None:
+                date_of_birth = '0/0/0'
+            if height is None:
+                height = '0'
+            if weight is None:
+                weight = '0'
+            if spike is None:
+                spike = '0'
+            if block is None:
+                block = '0'
+            
+            # Create tuple for writting the CSV file
+            player_statistics = tuple((name, date_of_birth, height, weight, spike, block, position_number))
+            
+            _write_csv(player_statistics)
+
+                # if height is None or weight is None:
+                #     f.writelines('0')
+                #     f.writelines('\n')
+                
+                # else:
+                #     f.writelines(str(name).strip())
+                #     f.writelines(',')
+                #     f.writelines(str(date_of_birth.group()))
+                #     f.writelines(',')
+                #     f.writelines(str(height.group(1)))
+                #     f.writelines(',')
+                #     f.writelines(str(weight.group(1)))
+                #     f.writelines(',')
+                #     f.writelines(str(spike))
+                #     f.writelines(',')
+                #     f.writelines(str(block))
+                #     f.writelines(',')
+                #     f.writelines(str(position_number))
+                #     f.writelines('\n')
+                #     time.sleep(1)
+            
+            # else:
+            #     print('Cou not write payer...')
 
 # def main():
 #     pass
