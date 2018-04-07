@@ -10,10 +10,14 @@ from bs4 import BeautifulSoup as bs
 import urllib.parse as pr 
 
 URLS = [
-    u'http://rio2016.fivb.com/en/volleyball/women/teams/{}/team_roster',
-    u'http://u20.women.2017.volleyball.fivb.com/en/teams/{}/team_roster',
     u'http://u20.women.2015.volleyball.fivb.com/en/competition/teams/{}/team_roster',
-    u'http://u20.women.2015.volleyball.fivb.com/en/competition/teams/'
+    u'http://u20.women.2015.volleyball.fivb.com/en/competition/teams/',
+    u'http://u20.women.2017.volleyball.fivb.com/en/teams/{}/team_roster',
+    u'http://u20.women.2017.volleyball.fivb.com/en/teams/',
+    u'http://u23.women.2017.volleyball.fivb.com/en/teams/{}/team_roster',
+    u'http://u23.women.2017.volleyball.fivb.com/en/teams/'
+    u'http://rio2016.fivb.com/en/volleyball/women/teams/{}/team_roster',
+    u'http://rio2016.fivb.com/en/volleyball/women/teams/',
 ]
 
 # [group, country, url_country]
@@ -28,7 +32,7 @@ COUNTRIES = {
     "czech-republic": ['group2', 8, 'cze-czech republic'],
     "bulgaria": ['group2', 9, 'bul-bulgaria'],
     "brazil": ['group1', 10, 'bra-brazil'],
-    "dominican-republic": ['group1', 11, 'dom-dominican republic'],
+    "dominican-republic": ['group1', 11, 'dom dominican republic'],
     "france": ['group3', 12, 'fra-france'],
     "germany": ['group2', 13, 'ger-germany'],
     "hungary": ['group3', 14, 'hun-hungary'],
@@ -50,6 +54,9 @@ COUNTRIES = {
     "peru": ['', 30, 'per-peru'],
     "cuba": ['', 31, 'cub-cuba'],
     "taipei": ['', 32, 'tpe-chinese taipei'],
+    "kenya": ['', 33, 'ken-kenya'],
+    "thailand": ['', 34, 'tha-thailand'],
+    "slovenia": ['', 35, 'slo-slovenia'],
 }
 
 USERAGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0"
@@ -107,6 +114,7 @@ def _send_requests(url_reference, country):
         url_to_get = url_reference
 
     try:
+        print('Requesting link: ', url_to_get)
         response = req.get(url_to_get, USERAGENT)
     except req.HTTPError as error:
         raise ConnectionError("{reason}".format(reason=error.args))
@@ -122,7 +130,7 @@ def _write_csv(player_details_object, country_nuber, header=False, file_name='vo
     print('Writting CSV for', player_details_object[0])
     with open(file_name, 'a', encoding='utf_8') as f:
         if header is True:
-            f.writelines('name,date_of_birth,height,weight,spike,block,position_number')
+            f.writelines('name,date_of_birth,height,weight,spike,block,position_number,country')
             f.writelines('\n')
 
         for player_detail_object in player_details_object:
@@ -131,7 +139,7 @@ def _write_csv(player_details_object, country_nuber, header=False, file_name='vo
         f.writelines(str(country_nuber))
         f.writelines('\n')
 
-def scrap_player_position(url_number, country):
+def _get_details(url_number, country):
     """
     Payer positio
 
@@ -153,12 +161,11 @@ def scrap_player_position(url_number, country):
         # Test i there is a payer i in avaiabe
         id_exists = re.search(PATTERNS[4], str(link))
         if id_exists is not None:
-            get_relative_links = re.search(PATTERNS[5], str(id_exists.group(1)))
-            # Construct url link
+            get_relative_link = re.search(PATTERNS[5], str(id_exists.group(1)))
+
             # .../rus-russia/players/angelina-lazarenko?id=48260
             print('Constructing link...')
-
-            constructed_player_page_url_link = pr.urljoin(URLS[3], get_relative_links.group())
+            constructed_player_page_url_link = pr.urljoin(URLS[6], get_relative_link.group()) # !- Must change URLS[?] to adapt to link
             time.sleep(1)
 
             print('Getting payer page id:', re.search(r'id\=([0-9]+)', constructed_player_page_url_link).group(1))
@@ -176,6 +183,7 @@ def scrap_player_position(url_number, country):
 
             name = date_of_birth = height = weight = ''
             spike = block = ''
+            position_number = 0
 
             if player_details is not None:
                 name = player_details.div.div.h4.text
@@ -229,12 +237,15 @@ def scrap_player_position(url_number, country):
             # Create tuple for writting the CSV file
             player_statistics = tuple((name, date_of_birth, height, weight, spike, block, position_number))
             
-            _write_csv(player_statistics, COUNTRIES[country])
+            _write_csv(player_statistics, COUNTRIES[country][1])
 
 def main():
-    print('Voeyba scrapper 2017 v.1.0.0')
-    print('-'*30)
-    scrap_player_position(2, 'china')
+    print('Voeyba scrapper 2018 v.1.0.0')
+    print('-'*60)
+
+    a = ['slovenia', 'thailand', 'turkey']
+    for o in a:
+        _get_details(5, o)
 
 main()
 
