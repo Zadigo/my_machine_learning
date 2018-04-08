@@ -5,9 +5,14 @@
 import re
 import time
 import requests as req
-# import useragent as agent
-from bs4 import BeautifulSoup as bs
 import urllib.parse as pr 
+from user_agent.useragent import get_user_agent
+from bs4 import BeautifulSoup as bs
+
+__version__ = '0.1.0'
+__author__ = ''
+
+USERAGENT = get_user_agent()
 
 URLS = [
     u'http://u20.women.2015.volleyball.fivb.com/en/competition/teams/{}/team_roster',
@@ -15,9 +20,9 @@ URLS = [
     u'http://u20.women.2017.volleyball.fivb.com/en/teams/{}/team_roster',
     u'http://u20.women.2017.volleyball.fivb.com/en/teams/',
     u'http://u23.women.2017.volleyball.fivb.com/en/teams/{}/team_roster',
-    u'http://u23.women.2017.volleyball.fivb.com/en/teams/'
+    u'http://u23.women.2017.volleyball.fivb.com/en/teams/',
     u'http://rio2016.fivb.com/en/volleyball/women/teams/{}/team_roster',
-    u'http://rio2016.fivb.com/en/volleyball/women/teams/',
+    u'http://rio2016.fivb.com/en/volleyball/women/teams/'
 ]
 
 # [group, country, url_country]
@@ -56,10 +61,10 @@ COUNTRIES = {
     "taipei": ['', 32, 'tpe-chinese taipei'],
     "kenya": ['', 33, 'ken-kenya'],
     "thailand": ['', 34, 'tha-thailand'],
-    "slovenia": ['', 35, 'slo-slovenia'],
+    "slovenia": ['', 35, 'slo-slovenia']
 }
 
-USERAGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0"
+# USERAGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0"
 
 # 4: rus-russia/players/angelina-lazarenko?id=48260 id="...
 # 5: rus-russia/players/angelina-lazarenko?id=48260
@@ -165,7 +170,7 @@ def _get_details(url_number, country):
 
             # .../rus-russia/players/angelina-lazarenko?id=48260
             print('Constructing link...')
-            constructed_player_page_url_link = pr.urljoin(URLS[6], get_relative_link.group()) # !- Must change URLS[?] to adapt to link
+            constructed_player_page_url_link = pr.urljoin(URLS[7], get_relative_link.group()) # !- Must change URLS[?] to adapt to link
             time.sleep(1)
 
             print('Getting payer page id:', re.search(r'id\=([0-9]+)', constructed_player_page_url_link).group(1))
@@ -240,12 +245,14 @@ def _get_details(url_number, country):
             _write_csv(player_statistics, COUNTRIES[country][1])
 
 def main():
+    """
+    """
     print('Voeyba scrapper 2018 v.1.0.0')
     print('-'*60)
 
-    a = ['slovenia', 'thailand', 'turkey']
+    a = ['argentina', 'brazil', 'china', 'cameroon', 'italy', 'japan', 'korea', 'netherlands', 'puerto-rico', 'russia', 'serbia', 'usa']
     for o in a:
-        _get_details(5, o)
+        _get_details(6, o)
 
 main()
 
