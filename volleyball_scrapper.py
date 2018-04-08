@@ -6,13 +6,13 @@ import re
 import time
 import requests as req
 import urllib.parse as pr 
-from user_agent.useragent import get_user_agent
+from useragent import UserAgent
 from bs4 import BeautifulSoup as bs
 
 __version__ = '0.1.0'
 __author__ = ''
 
-USERAGENT = get_user_agent()
+USERAGENT = UserAgent().get_user_agent
 
 URLS = [
     u'http://u20.women.2015.volleyball.fivb.com/en/competition/teams/{}/team_roster',
