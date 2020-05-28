@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>{% block title %}{% endblock %}</title>
+
+        <!-- Google stylesheets -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    </head>
+    <body>
+        <main>
+            <div class="container">
+                <div id="app">
+                    <div class="card-panel">
+                        <phrase v-bind:question="currentquestion" />
+                    </div>
+                    <div class="card-panel">
+                        <answers @doselection="updatecursor" v-bind:question="currentquestion" />
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- JQuery -->
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+        <!-- Minified JavaScript -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/js/materialize.min.js"></script>
+        <!-- Materialize scripts -->
+
+        <script>
+            $(document).ready(function(){
+                // Sidenav
+                $('.sidenav').sidenav();
+                // Scrollspy
+                $('.scrollspy').scrollSpy();
+                // Select
+                $('select').formSelect();
+                // Modals
+                $('.modal').modal();
+            });
+        </script>
+
+        <!-- LODASH -->
+        <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
+
+        <!-- VUEJS -->
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="./language.js"></script>
+    </body>
+</html>

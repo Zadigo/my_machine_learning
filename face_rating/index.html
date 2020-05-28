@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>{% block title %}{% endblock %}</title>
+
+        <!-- Google stylesheets -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    </head>
+    <body>
+        <main>
+            <div class="container">
+                <div class="row">
+                    <div class="col s12 m12 l12">
+                        <div class="card-panel">
+                            <p>
+                                Thanks for taking part to this experience. I will be proposing to you a hundred
+                                different faces that you will have to rate in terms of attraction and based on
+                                your personal preferences. The experience can take some time so I would suggest
+                                you take 10 to 15 minutes in order to complete the selection :)
+                            </p>
+                            <a href="./scoring.html" class="btn-large red darken-1 waves-effect waves-light">
+                                <i class="material-icons left">play_arrow</i>
+                                Start
+                            </a>
+
+                            <a class="btn-large red darken-1 modal-trigger waves-effect waves-light" href="#modal1">
+                                <i class="material-icons left">play_arrow</i>
+                                Start
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="user" id="user_information">
+                        <modalcontent />
+                    </div>
+
+                    <div class="col s12 m12 l12">
+                        <div class="card-panel">
+                            <a href="#!" class="btn-large blue darken-1 waves-effect waves-light">
+                                <i class="material-icons left">feedback</i>
+                                Propose celebrities
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- JQuery -->
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+        <!-- Minified JavaScript -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/js/materialize.min.js"></script>
+        <!-- Materialize scripts -->
+
+        <script>
+            $(document).ready(function(){
+                // Sidenav
+                $('.sidenav').sidenav();
+                // Scrollspy
+                $('.scrollspy').scrollSpy();
+                // Select
+                $('select').formSelect();
+                // Modals
+                $('.modal').modal();
+            });
+        </script>
+
+        <!-- LODASH -->
+        <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
+
+        <!-- VUEJS -->
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="./index.js"></script>
+    </body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>{% block title %}{% endblock %}</title>
+
+        <!-- Google stylesheets -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <link rel="stylesheet" href="./scoring.css">
+    </head>
+    <body>
+        <main>
+            <div class="container" id="app">
+                <section class="section">
+                    <div class="row">
+                        <div class="col s12 m12 l12">
+                            <div class="col offset-m3 offset-l3 s12 m4 l4">
+                                <imagecomponent v-bind:imageorder="imageorder" v-bind:images="images" />
+                            </div>
+                            <div class="col offset-m3 offset-l3 s12 m12 l12">
+                                <ratingcomponent @nextface="shownextface" @finalizerating="doratings" v-bind:isfinalimage="isfinalimage" />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- JQuery -->
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+        <!-- Minified JavaScript -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/js/materialize.min.js"></script>
+        <!-- Materialize scripts -->
+
+        <script>
+            $(document).ready(function(){
+                // Sidenav
+                $('.sidenav').sidenav();
+                // Scrollspy
+                $('.scrollspy').scrollSpy();
+                // Select
+                $('select').formSelect();
+                // Modals
+                $('.modal').modal();
+            });
+        </script>
+
+        <!-- LODASH -->
+        <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
+
+        <!-- VUEJS -->
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="./scoring.js"></script>
+    </body>
+</html>
